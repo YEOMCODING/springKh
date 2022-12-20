@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+        <!--
+            Spring Quartz ? 스프링에서 스케줄링을 하기위한 2번째 방법
+
+            1. context:component-scan 추가
+            2. pom.xml 3개 파일 추가
+
+            Sring quartz 에는 작업단위가 크게 3가지 컴포넌트로 나눠져 있다.
+            Job : 실제로 작업을 할 작업단위 정의
+            Trigger : Job을 어떤방식으로 실행시킬지 시간을 정의함
+            Scheduler : 내가만든 트리거들을 등록해서 내가 원하는 시간에 작업들이 이루어지도록 스케줄링함
+        -->
+        <context:component-scan base-package="com.kh.spring"></context:component-scan>
+
+        <!--
+            Job 빈 생성
+            메서드 단위로 실행되는 스케줄러
+            job컴포넌트가 MethodInvokingJobDetailFactoryBean이고 여러개도 설정 가능하다.
+            매개변수로 데이터 추가도 가능함
+         -->
+        <bean id="job1" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+                <property name="targetObject" ref="memberController"/>
+                <!-- 위에 타겟오브젝트에 설정한 bean객체 안의 메서드 -->
+                <property name="targetMethod" value="testQuartz"/>
+                <!-- 작업이 동시 실행 방지 기능 -->
+                <property name="concurrent" value="false"/>
+        </bean>
+
+        <bean id="changePwd" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                <property name="jobClass" value="com.kh.spring.member.controller.MemberController"/>
+                <property name="jobDataAsMap">
+                        <map>
+                                <entry key="memberService" value-ref="memberService"/>
+                        </map>
+                </property>
+        </bean>
+        <!-- trigger
+            내가 job을 통해 정의한 동작의 실행방법을 정의
+        -->
+        <bean id="jobTrigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                <!-- ref는 job1의 아이디값과 일치시켜줘야한다 -->
+                <property name="jobDetail" ref="job1"/>
+                <property name="cronExpression" value="0/1 0/1 * 1/1 * ? *"/> <!-- 0초부터 2초간격으로 -->
+        </bean>
+        <bean id="jobTrigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                <property name="jobDetail" ref="changePwd"/>
+                <property name="cronExpression" value="0/5 * * 1/1 * ? *" />
+        </bean>
+
+        <!--
+            Scheduler
+            위에 정의한 job과 trigger를 관리하고 정의해둔 트리거를 실행시키는 녀석
+        -->
+        <bean id="jobScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+                <!-- 스케쥴러로 작동시킬 트리거 목록 추가-->
+                <property name="triggers">
+                        <!-- list 안에 작성한 트리거를 추가 -->
+                        <list>
+                                <!-- ref의 bean 값은 트리거의 id 값-->
+<!--                                <ref bean="jobTrigger1"/>-->
+                                <ref bean="jobTrigger2"/>
+                        </list>
+                </property>
+        </bean>
+</beans>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="boardMapper">
+	
+	<select id="selectListCount" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD
+		WHERE STATUS = 'Y'AND BOARD_CD = #{boardCode}
+	</select>
+	
+	<resultMap type="board" id="boardResultSet">
+		<result column="BOARD_NO" property="boardNo"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_WRITER" property="boardWriter"/>
+		<result column="COUNT" property="count"/>
+		<result column="CREATE_DATE" property="createDate"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="ORIGIN_NAME" property="originName"/>
+		<result column="CHANGE_NAME" property="changeName"/>
+		<result column="BOARD_CD" property="boardCd"/>
+	</resultMap>
+
+	<resultMap id="replyResultSet" type="reply">
+		<id column="REPLY_NO" property="replyNo"/>
+		<id column="REF_BNO" property="refBno"/>
+		<result column="REPLY_WRITER" property="replyWriter"/>
+		<result column="REPLY_CONTENT" property="replyContent"/>
+		<result column="CREATE_DATE" property="createDate"/>
+	</resultMap>
+
+	<resultMap id="boardTypeResultSet" type="boardType">
+		<result column="BOARD_CD" property="boardCd"/>
+		<result column="BOARD_NAME" property="boardName"/>
+	</resultMap>
+
+	<select id="selectBoardTypeList" resultMap="boardTypeResultSet">
+		SELECT *
+		FROM BOARD_TYPE
+		ORDER BY BOARD_CD
+	</select>
+
+
+
+
+	<select id="selectReplyList" parameterType="int" resultMap="replyResultSet">
+		SELECT
+			REPLY_NO,
+			REPLY_CONTENT,
+			REF_BNO,
+			M.USER_ID AS REPLY_WRITER,
+			R.CREATE_DATE,
+			R.STATUS
+		FROM REPLY R
+		JOIN MEMBER M ON R.REPLY_WRITER = M.USER_NO
+		WHERE REF_BNO = #{bno}
+		AND R.STATUS = 'Y'
+	</select>
+
+
+
+	
+	<select id="selectList" resultMap="boardResultSet">
+		SELECT
+			BOARD_NO,
+			BOARD_TITLE,
+			BOARD_WRITER,
+			COUNT,
+			CREATE_DATE,
+			ORIGIN_NAME
+			FROM BOARD
+			WHERE STATUS='Y' AND BOARD_CD = #{boardCode}
+			ORDER BY CREATE_DATE DESC
+	</select>
+
+	<insert id="insertBoard" parameterType="board">
+		INSERT INTO BOARD(BOARD_NO,BOARD_TITLE,BOARD_CONTENT,BOARD_WRITER,ORIGIN_NAME,CHANGE_NAME)
+		VALUES (SEQ_BNO.NEXTVAL,#{boardTitle},#{boardContent},#{boardWriter},#{originName},#{changeName})
+	</insert>
+
+	<insert id="insertReply" parameterType="reply">
+		INSERT INTO REPLY(REPLY_NO,REPLY_CONTENT,REF_BNO,REPLY_WRITER,CREATE_DATE,STATUS)
+		VALUES (SEQ_RNO.NEXTVAL,#{replyContent},#{refBno},#{replyWriter},SYSDATE,DEFAULT)
+	</insert>
+
+
+	<update id="increaseCount" parameterType="int">
+		UPDATE BOARD
+		SET COUNT = COUNT+1
+		WHERE BOARD_NO = #{bno}
+	</update>
+
+
+
+	<select id="selectBoard" parameterType="int" resultMap="boardResultSet">
+		SELECT
+			BOARD_NO,
+			BOARD_TITLE,
+			BOARD_WRITER,
+			COUNT,
+			BOARD_CONTENT,
+			ORIGIN_NAME,
+			CHANGE_NAME
+		FROM BOARD
+		WHERE BOARD_NO = #{bno}
+	</select>
+	
+	<delete id="deleteBoard" parameterType="int">
+		DELETE FROM BOARD WHERE BOARD_NO = #{boardNo}
+	</delete>
+
+
+
+	<select id="boardSearch" resultMap="boardResultSet" parameterType="hashmap">
+		SELECT
+		BOARD_NO,
+		BOARD_TITLE,
+		USER_ID AS BOARD_WRITER,
+		COUNT,
+		B.CREATE_DATE,
+		ORIGIN_NAME
+		FROM BOARD B
+		JOIN MEMBER M ON(B.BOARD_WRITER = M.USER_NO)
+		WHERE B.STATUS='Y' AND BOARD_CD = #{boardCode}
+		<if test="keyword != null and keyword != ''">
+			AND
+		      <choose>
+				  <when test="condition == 'title'">
+					  BOARD_TITLE LIKE '%${keyword}%'
+				  </when>
+				  <when test="condition == 'content'">
+					  BOARD_CONTENT LIKE '%${keyword}%'
+				  </when>
+				  <when test="condition == 'titleAndContent'">
+					  (BOARD_TITLE LIKE '%${keyword}%' OR
+					  BOARD_CONTENT LIKE '%${keyword}%')
+				  </when>
+				  <when test="condition == 'writer'">
+					  USER_ID LIKE '%${keyword}%'
+				  </when>
+			  </choose>
+		</if>
+		ORDER BY BOARD_NO DESC
+	</select>
+
+	<select id="findFile" resultType="string">
+		SELECT
+			SUBSTR(CHANGE_NAME,INSTR(CHANGE_NAME,'/',1,2)+1)
+		FROM BOARD
+		WHERE ORIGIN_NAME IS NOT NULL
+	</select>
+
+	<select id="searchListCount" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD B
+		LEFT JOIN MEMBER M ON (B.BOARD_WRITER = M.USER_NO)
+		WHERE B.STATUS = 'Y' AND BOARD_CD = #{boardCode}
+		<if test="keyword != null and keyword != ''">
+			AND
+			<choose>
+				<when test="condition == 'title'">
+					BOARD_TITLE LIKE '%${keyword}%'
+				</when>
+				<when test="condition == 'content'">
+					BOARD_CONTENT LIKE '%${keyword}%'
+				</when>
+				<when test="condition == 'titleAndContent'">
+					(BOARD_TITLE LIKE '%${keyword}%' OR
+					BOARD_CONTENT LIKE '%${keyword}%')
+				</when>
+				<when test="condition == 'writer'">
+					USER_ID LIKE '%${keyword}%'
+				</when>
+			</choose>
+		</if>
+	</select>
+</mapper>

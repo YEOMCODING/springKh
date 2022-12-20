@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--
+        spring scheduler ?
+        매일 , 매분, 매초, 매주, 매달 반복적으로 실행시켜야 하는 프로세스가 있는경우
+        스프링 스케줄러를 사용하면 간편하게 셋팅이 가능.
+        콰츠(quartz) -> 복잡한 스케쥴링이 필요한 경우에 사용
+    -->
+    <!--
+        스프링 스케쥴러 작업순서
+        1. 셋팅 : xmls:task, context 스키마와 + 스키마로케이션등록.
+        2. annotoin 활성화 -> tesk
+        3. 스케쥴러로 사용할 클래스를 빈으로 등록
+        4. web.xml에서 프로그램 구동시 spring-scheduler를 추가시킨다.
+        5. 스케쥴링을 원하는 메소드로 가서 schedule 어노테이션 추가.
+        6. 원하는 실행방식을 결정하여 스케쥴링 하기(고정방식, contrab방식)
+    -->
+    <context:component-scan base-package="com.kh.spring"></context:component-scan>
+    <task:annotation-driven scheduler="khScheduler"/>
+    <task:scheduler id="khScheduler" pool-size="10"/>
+    <!--
+        쓰레드 풀 갯수 지정. 지정하지 않으면 기본값 1
+        메인 스레드에 영향을 끼치지 않게 하기위해서. 비동기적으로 사용하기위해 선언.
+    -->
+    <task:scheduled-tasks scheduler="khScheduler">
+        <!--
+            ref : 빈 클래스이름을 카멜표기법으로 등록.
+            method : 해당빈클래스에서 스케줄링할 메소드명
+        -->
+        <task:scheduled ref="memberController" method="testCron" cron="0 0 0 31 * *"/>
+        <!--
+            cron 표현식
+            *  *  *  *  *  *  * 실행할 명령어
+            초 분  시  일 월 요일 년도(생략가능)
+            * : 모든 값(매시, 매일, 매주)
+            ? : 어떤 값이던 상관없다.
+            - : 범위를 지정 24-25
+            , : 여러값을 지정할때 12, 18
+            / : 중복값 , 0/2 -> 0초기값, 2는 증가치
+            L : 지정할수 있는 범위의 마지막 값 표시
+            W : 가장 가까운 평일을 설정할때
+            # : N번째 특정요일을 설정할때
+
+            매일 오전 1시에 실행되게끔 설정하고 싶다.
+            0 0 1 * * *
+            매일 30분마다 실해되게끔 설정.
+            0 30 * * * *
+
+            크론메이커 -> 크론설정 쉽게 해주는 사이트
+        -->
+    </task:scheduled-tasks>
+</beans>
