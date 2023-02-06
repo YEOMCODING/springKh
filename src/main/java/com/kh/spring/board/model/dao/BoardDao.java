@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.kh.spring.board.model.vo.BoardImg;
 import com.kh.spring.board.model.vo.BoardType;
 import com.kh.spring.board.model.vo.Reply;
 import org.apache.ibatis.session.RowBounds;
@@ -31,11 +32,16 @@ public class BoardDao {
 		
 		RowBounds rowBounds = new RowBounds(offset,limit);
 		
-		return (ArrayList) sqlSession.selectList("boardMapper.selectList", boardCode ,rowBounds);
+		return (ArrayList) sqlSession.selectList("boardMapper.selectList",boardCode ,rowBounds);
 	}
 
 	public int insertBoard(SqlSession sqlSession, Board b) {
-		return sqlSession.insert("boardMapper.insertBoard", b);
+		int result = sqlSession.insert("boardMapper.insertBoard", b);
+		if(result > 0){
+			result = b.getBoardNo();
+		}
+		// 게시글 삽입 성공시 -> selectkey 태그를 이용해서 세팅한 boardNo 값을 b에 담아서 반환시켜줌.
+		return result;
 	}
 
 	public int increaseCount(SqlSession sqlSession, int bno) {
@@ -75,4 +81,27 @@ public class BoardDao {
     public List<BoardType> selectBoardTypeList(SqlSession sqlSession) {
 		return sqlSession.selectList("boardMapper.selectBoardTypeList");
     }
+
+	public  int updateBoard(SqlSession sqlSession, Board b) {
+		return sqlSession.update("boardMapper.updateBoard", b);
+	}
+
+	public int updateBoardImg(SqlSession sqlSession, BoardImg img) {
+		return sqlSession.update("boardMapper.updateBoardImg", img);
+	}
+
+	public int insertBoardImg(SqlSession sqlSession, BoardImg img) {
+		return sqlSession.update("boardMapper.insertBoardImg",img);
+	}
+
+	public int insertBoardImgList(SqlSession sqlSession, List<BoardImg> boardImageList) {
+		return sqlSession.insert("boardMapper.insertBoardImgList", boardImageList);
+	}
+
+	public int deleteBoaerdImage(SqlSession sqlSession, Map<String, Object> map) {
+		return sqlSession.delete("boardMapper.deleteBoardImage", map);
+
+	}
+
+
 }

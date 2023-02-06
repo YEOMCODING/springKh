@@ -34,7 +34,7 @@ public class AccessValidator extends HandlerInterceptorAdapter {
         }
         // 로그인 했지만 권한이 없는 사용자
         if(requestUrl.indexOf("admin") > -1 && !role.equals("A")){
-            // url 에 admin 이 있는 경로로 갈 경우 session에 있는 member객체에서 role을 검사하기.ㄴ
+            // url 에 admin 이 있는 경로로 갈 경우 session에 있는 member객체에서 role을 검사하기.
             try {
                 req.setAttribute("errorMsg","권한이 없습니다");
                 req.getRequestDispatcher("/WEB-INF/views/common/errorPage.jsp").forward(req,res);

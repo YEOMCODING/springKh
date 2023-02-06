@@ -14,6 +14,12 @@ public class Board {
 	private int count;
 	private Date createDate;
 	private String status;
+
+
 	private String originName;
 	private String changeName;
+
+	private String boardCd;
+
+	private ArrayList<BoardImg> imgList;
 }

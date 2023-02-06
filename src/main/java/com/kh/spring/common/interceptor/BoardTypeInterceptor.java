@@ -29,10 +29,6 @@ public class BoardTypeInterceptor extends HandlerInterceptorAdapter {
             List<BoardType> boardTypeList = boardService.selectBoardTypeList();
 
             application.setAttribute("boardTypeList",boardTypeList);
-
-
-
-
         }
         return true;
     }

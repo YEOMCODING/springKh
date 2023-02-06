@@ -1,5 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <html>
 <head>
     <title>Title</title>
@@ -29,6 +31,19 @@
                     <a href="${contextPath}/${b.changeName}" download="${b.originName}">${b.originName}</a>
                 </td>
             </tr>
+            <c:if test="${!empty b.imgList }">
+                <c:forEach var="i" begin="0" end="${fn:length(b.imgList) -1 }">
+                    <tr>
+                        <th>이미지${i+1}</th>
+                        <td colspan="3">
+                            <img src="${contextPath}/resources/images/boardT/${b.imgList[i].changeName}" width="600px;">
+                            <a href="${contextPath}/resources/images/boardT/${b.imgList[i].changeName}"
+                               download="${b.imgList[i].originName}">다운로드</a>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:if>
+
             <tr>
                 <th>내용</th>
                 <td colspan="3"></td>
@@ -40,7 +55,7 @@
         <br>
         <div align="center">
             <!-- 수정하기, 삭제하기 버튼은 이 글이 본인이 작성한 글일경우에만 보여져야한다.-->
-            <a class="btn btn-primary" href="">수정하기</a>
+            <a class="btn btn-primary" href="${contextPath}/board/enrollForm/${boardCode}?mode=update&bno=${b.boardNo}">수정하기</a>
             <a class="btn btn-danger" href="${contextPath}/board/deleteBoard.bo?bno=${b.boardNo}">삭제하기</a>
         </div>
         <br><br>

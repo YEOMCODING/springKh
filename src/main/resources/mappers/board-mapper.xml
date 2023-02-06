@@ -4,11 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="boardMapper">
 	
-	<select id="selectListCount" resultType="int">
-		SELECT COUNT(*)
-		FROM BOARD
-		WHERE STATUS = 'Y'AND BOARD_CD = #{boardCode}
-	</select>
+
 	
 	<resultMap type="board" id="boardResultSet">
 		<result column="BOARD_NO" property="boardNo"/>
@@ -20,7 +16,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result column="ORIGIN_NAME" property="originName"/>
 		<result column="CHANGE_NAME" property="changeName"/>
 		<result column="BOARD_CD" property="boardCd"/>
+		<collection property="imgList" column ="BOARD_NO" javaType="java.util.ArrayList"
+					ofType="boardImg" select="selectImgList"/>
+		<!--		하나의 board_no에 arrayList 형태로 보관하겠다-->
 	</resultMap>
+
+	<resultMap id="boardImgResultSet" type="boardImg">
+		<id property="boardImgNo" column="BOARD_IMG_NO"/>
+		<result property="originName" column="ORIGIN_NAME"/>
+		<result property="changeName" column="CHANGE_NAME"/>
+		<result property="refBno" column="REF_BNO"/>
+		<result property="imgLevel" column="IMG_LEVEL"/>
+	</resultMap>
+
 
 	<resultMap id="replyResultSet" type="reply">
 		<id column="REPLY_NO" property="replyNo"/>
@@ -35,11 +43,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result column="BOARD_NAME" property="boardName"/>
 	</resultMap>
 
+
+
 	<select id="selectBoardTypeList" resultMap="boardTypeResultSet">
 		SELECT *
 		FROM BOARD_TYPE
 		ORDER BY BOARD_CD
 	</select>
+
+	<select id="selectListCount" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD
+		WHERE STATUS = 'Y'AND BOARD_CD = #{boardCode}
+	</select>
+
+	<select id="selectImgList" resultMap="boardImgResultSet">
+		SELECT *
+		FROM BOARD_IMG
+		WHERE REF_BNO = #{boardNo}
+		ORDER BY IMG_LEVEL
+	</select>
+
 
 
 
@@ -74,10 +98,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			ORDER BY CREATE_DATE DESC
 	</select>
 
-	<insert id="insertBoard" parameterType="board">
-		INSERT INTO BOARD(BOARD_NO,BOARD_TITLE,BOARD_CONTENT,BOARD_WRITER,ORIGIN_NAME,CHANGE_NAME)
-		VALUES (SEQ_BNO.NEXTVAL,#{boardTitle},#{boardContent},#{boardWriter},#{originName},#{changeName})
+	<insert id="insertBoard" parameterType="board" useGeneratedKeys="true">
+		<selectKey keyProperty="boardNo" resultType="_int" order="BEFORE">
+			SELECT SEQ_BNO.NEXTVAL FROM DUAL
+		</selectKey>
+
+		INSERT INTO BOARD(BOARD_NO,BOARD_TITLE,BOARD_CONTENT,BOARD_WRITER,ORIGIN_NAME,CHANGE_NAME,BOARD_CD)
+		VALUES (#{boardNo},#{boardTitle},#{boardContent},#{boardWriter},#{originName},#{changeName},#{boardCd})
 	</insert>
+
+	<insert id="insertBoardImgList" parameterType="list">
+		INSERT INTO BOARD_IMG
+		SELECT SEQ_IMG_NO.NEXTVAL AS IMG_NO , C.* FROM(
+		    <foreach collection="list" item="img" separator="UNION ALL">
+				SELECT #{img.originName} as ORIGIN_NAME,
+				       #{img.changeName} as CHANGE_NAME,
+				       #{img.refBno} as REF_BNO,
+					   #{img.imgLevel} as IMG_LEVEL
+				FROM DUAL
+			</foreach>
+													  )C
+	</insert>
+
+
+
+
 
 	<insert id="insertReply" parameterType="reply">
 		INSERT INTO REPLY(REPLY_NO,REPLY_CONTENT,REF_BNO,REPLY_WRITER,CREATE_DATE,STATUS)
@@ -105,10 +150,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		FROM BOARD
 		WHERE BOARD_NO = #{bno}
 	</select>
-	
-	<delete id="deleteBoard" parameterType="int">
-		DELETE FROM BOARD WHERE BOARD_NO = #{boardNo}
-	</delete>
 
 
 
@@ -175,4 +216,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</choose>
 		</if>
 	</select>
+
+	<update id="updateBoard" parameterType="board">
+		UPDATE BOARD SET
+						 BOARD_TITLE = #{boardTitle},
+						 BOARD_CONTENT = #{boardContent},
+						 ORIGIN_NAME = #{originName},
+						 CHANGE_NAME = #{changeName}
+		WHERE BOARD_NO = #{boardNo}
+	</update>
+
+	<update id="updateBoardImg" parameterType="boardImg">
+		UPDATE BOARD_IMG SET
+							 ORIGIN_NAME = #{originName},
+							 CHANGE_NAME = #{changeName}
+		WHERE REF_BNO = #{refBno} AND IMG_LEVEL = #{imgLevel}
+	</update>
+
+	<insert id="insertBoardImg">
+		INSERT INTO BOARD_IMG VALUES (
+										 SEQ_IMG_NO.NEXTVAL,
+										 #{originName},
+										 #{changeName},
+										 #{refBno},
+										 #{imgLevel}
+									 )
+
+
+	</insert>
+
+
+
 </mapper>

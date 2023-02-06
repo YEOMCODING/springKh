@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -75,10 +76,9 @@ height:80%; position:absolute; margin:auto; top:0px; bottom:0px; right:0px; left
 </style>
 </head>
 <body>
-
-	<c:if test="${ not empty alertMsg }">
+	<c:if test="${ not empty alertMsg}">
 		<script>
-			alertify.alert("서비스 요청 성공", '${alertMsg}' );
+			alertify.alert("서비스 요청 성공",'${alertMsg}');
 		</script>
 		<c:remove var="alertMsg" scope="session" />
 	</c:if>
@@ -111,7 +111,7 @@ height:80%; position:absolute; margin:auto; top:0px; bottom:0px; right:0px; left
 		<div id="header_2">
 			<ul>
 				<li><a href="${contextPath}/">HOME</a></li>
-				<li><a href="${contextPath}/">공지사항</a></li>
+				<li><a href="${contextPath}/chat/chatRoomList">채팅</a></li>
 				<c:forEach items="${boardTypeList}" var="boardType">
 				<li><a href="${contextPath}/board/list/${boardType.boardCd}">${boardType.boardName}</a></li>
 				</c:forEach>

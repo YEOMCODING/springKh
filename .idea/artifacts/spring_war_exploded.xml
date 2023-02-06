@@ -57,6 +57,10 @@
           <element id="library" level="project" name="Maven: org.quartz-scheduler:quartz-jobs:2.3.2" />
           <element id="library" level="project" name="Maven: org.springframework:spring-context-support:5.3.20" />
           <element id="library" level="project" name="Maven: org.aspectj:aspectjweaver:1.9.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-websocket:5.3.20" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.14.1" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.14.1" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.14.1" />
         </element>
       </element>
       <element id="directory" name="META-INF">

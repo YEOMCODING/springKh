@@ -50,7 +50,7 @@
 			<br>
 			<!-- 로그인시에만 보이는 글쓰기 버튼. -->
 			<c:if test="${ not empty loginUser }">
-			<a class="btn btn-secondary" style="float:right;" href="enrollForm.bo">
+			<a class="btn btn-secondary" style="float:right;" href="${contextPath}/board/enrollForm/${boardCode}">
 			글쓰기</a>
 			</c:if>
 			<br>
@@ -90,7 +90,7 @@
 			<!-- 게시글 클릭했을때 게시글 상세보기화면으로 이동하는 스크립트 구현 -->
 			 <script>
 				 function movePage(bno) {
-					 location.href = '${contextPath}/board/detail.bo?bno='+bno;
+					 location.href = '${contextPath}/board/detail/${boardCode}/'+bno;
 				 }
 
 				 <%--$(function (){--%>
